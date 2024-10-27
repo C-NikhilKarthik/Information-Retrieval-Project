@@ -17,6 +17,7 @@ def get_transform():
 def preprocess_image(image_path):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    transform = get_transform()
     image = transform(image).unsqueeze(0)  # Apply transforms and add batch dimension
     return image
 

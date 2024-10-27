@@ -16,8 +16,9 @@ from Image_Functions import *
 
 app = FastAPI()
 
-class TextQueryRequest(BaseModel):
-    input: str
+class QueryRequest(BaseModel):
+    text_input: str
+    image_input:str
 
 # Connect to Elasticsearch
 es = AsyncElasticsearch(['http://localhost:9200'])
@@ -62,12 +63,12 @@ async def startup_event():
 
 
 @app.post("/Text_Query")
-async def Text_Query(request:TextQueryRequest):
+async def Text_Query(request:QueryRequest):
     print("Recieved input")
     if text_model is None:
         return {"Result":"No text model loaded"}
     # User query
-    user_query = request.input
+    user_query = request.text_input
     query_embedding = get_embedding(user_query,text_model)
 
     # Search for documents
@@ -97,11 +98,57 @@ async def Text_Query(request:TextQueryRequest):
                          "Abstract":doc['_source']['Abstract']
             }
             res.append(doc_details)
-            # print(f"Document ID: {doc['_id']}, Score: {doc['_score']}")
-            # print(f"Title: {doc['_source']['Title']}")
-            # print(f"URL: {doc['_source']['URL']}")
-            # print(f"Abstract: {doc['_source']['Abstract']}")
-            # print("\n")
+
+        return {"Result":res}
+
+
+    return {"Result":"No Valid document found"}
+
+
+@app.post("/Image_Query")
+async def Text_Query(request:QueryRequest):
+    print("Recieved input")
+    if image_model is None:
+        return {"Result":"No text model loaded"}
+
+    # Generate the query embedding for your image
+    image_path = request.image_input
+    query_embedding = generate_embedding(image_path,image_model)
+    # Elasticsearch query
+    query = {
+        "query": {
+            "nested": {
+                "path": "Image_embedding_list",
+                "score_mode": "max",  # Take the maximum score across nested vectors
+                "query": {
+                    "script_score": {
+                        "query": {
+                            "match_all": {}
+                        },
+                        "script": {
+                            "source": "cosineSimilarity(params.query_vector, 'Image_embedding_list.embedding') + 1.0",  # Cosine similarity computation
+                            "params": {
+                                "query_vector": query_embedding  # Pass the reference vector as a parameter
+                            }
+                        }
+                    }
+                }
+            }
+        },
+    }
+
+    response = await es.search(index=index_name, body=query)
+    res=[]
+    # Analyze results
+    if response['hits']['total']['value'] > 0:
+        for doc in response['hits']['hits']:
+            doc_details={
+                        "Document ID":doc['_id'],"Score":doc['_score'],
+                         "Title":doc['_source']['Title'],
+                         "URL":doc['_source']['URL'],
+                         "Abstract":doc['_source']['Abstract']
+            }
+            res.append(doc_details)
 
         return {"Result":res}
 
