@@ -106,10 +106,10 @@ async def Text_Query(request:QueryRequest):
 
 
 @app.post("/Image_Query")
-async def Text_Query(request:QueryRequest):
+async def Image_Query(request:QueryRequest):
     print("Recieved input")
     if image_model is None:
-        return {"Result":"No text model loaded"}
+        return {"Result":"No image model loaded"}
 
     # Generate the query embedding for your image
     image_path = request.image_input
@@ -154,3 +154,113 @@ async def Text_Query(request:QueryRequest):
 
 
     return {"Result":"No Valid document found"}
+
+
+@app.post("/Combined_Query")
+async def Combined_Query(request:QueryRequest):
+    print("Recieved input")
+    if image_model is None or text_model is None:
+        return {"Result":"All models not loaded"}
+
+    text_input = request.text_input
+    text_embedding = get_embedding(text_input, text_model)
+    print("Text Query embedding generated")
+
+    image_path = request.image_input
+    image_embedding = generate_embedding(image_path, image_model)
+    print("Image Query embedding generated")
+
+    text_query = {
+        "script_score": {
+            "query": {
+                "match_all": {}
+            },
+            "script": {
+                "source": "cosineSimilarity(params.query_vector, 'Text_embedding') + 1.0",
+                # Adding 1 to avoid negative values
+                "params": {
+                    "query_vector": text_embedding  # Convert to list if necessary
+                }
+            }
+        }
+    }
+
+    response_text = await es.search(index=index_name, body={"query": text_query})
+
+    image_query = {
+        "query": {
+            "nested": {
+                "path": "Image_embedding_list",
+                "score_mode": "max",  # Take the maximum score across nested vectors
+                "query": {
+                    "script_score": {
+                        "query": {
+                            "match_all": {}
+                        },
+                        "script": {
+                            "source": "cosineSimilarity(params.query_vector, 'Image_embedding_list.embedding') + 1.0",
+                            # Cosine similarity computation
+                            "params": {
+                                "query_vector": image_embedding  # Pass the reference vector as a parameter
+                            }
+                        }
+                    }
+                }
+            }
+        },
+    }
+
+    response_image = await es.search(index=index_name, body=image_query)
+
+    '''---------------------------- Combine Query results ----------------------------------------'''
+    sett = set()
+    mapping = {}
+
+    # Analyze results
+
+    for doc in response_text['hits']['hits']:
+        if doc['_id'] not in sett:
+            sett.add(doc['_id'])
+            mapping[doc['_id']] = {'Score': doc['_score'],
+                                   'Source': doc['_source'],
+                                    "Title": doc['_source']['Title'],
+                                    "URL": doc['_source']['URL'],
+                                    "Abstract": doc['_source']['Abstract']}
+        # print(f"Document ID: {doc['_id']}, Score: {doc['_score']}, Source: {doc['_source']}")
+
+    for doc in response_image['hits']['hits']:
+        if doc['_id'] not in sett:
+            sett.add(doc['_id'])
+            mapping[doc['_id']] = {'Score': doc['_score'],
+                                   'Source': doc['_source'],
+                                   "Title": doc['_source']['Title'],
+                                   "URL": doc['_source']['URL'],
+                                   "Abstract": doc['_source']['Abstract']}
+        else:
+            mapping[doc['_id']]['Score'] += doc['_score']
+
+        # print(f"Document ID: {doc['_id']}, Score: {doc['_score']}, Source: {doc['_source']}")
+
+    if len(mapping)==0:
+        return {"Result": "No Valid document found"}
+
+    Documents = []
+    for i in mapping:
+        Documents.append([i, mapping[i]['Score']])
+
+    sorted_Documents = sorted(Documents, key=lambda x: x[1], reverse=True)
+
+    res = []
+    for i in range(10):
+        doc_id = sorted_Documents[i][0]
+        doc_details = {
+            "Document ID": doc_id, "Score": mapping[doc_id]["Score"],
+            "Title": mapping[doc_id]["Title"],
+            "URL": mapping[doc_id]["URL"],
+            "Abstract": mapping[doc_id]["Abstract"]
+        }
+        res.append(doc_details)
+
+    return {"Result": res}
+
+
