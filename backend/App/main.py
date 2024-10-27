@@ -22,9 +22,12 @@ class TextQueryRequest(BaseModel):
 # Connect to Elasticsearch
 es = AsyncElasticsearch(['http://localhost:9200'])
 index_name = "ir_project"
+text_model=None
+image_model=None
 
 @app.on_event("startup")
 async def startup_event():
+    global text_model,image_model
     # Optionally, you can check if the Elasticsearch server is up and running
     try:
         await es.ping()
@@ -58,9 +61,11 @@ async def startup_event():
     print("------------------------------------------------- \n")
 
 
-@app.get("/Text_Query")
-async def Text_Query(request: TextQueryRequest):
+@app.post("/Text_Query")
+async def Text_Query(request:TextQueryRequest):
     print("Recieved input")
+    if text_model is None:
+        return {"Result":"No text model loaded"}
     # User query
     user_query = request.input
     query_embedding = get_embedding(user_query,text_model)
