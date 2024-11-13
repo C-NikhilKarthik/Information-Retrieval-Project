@@ -1,39 +1,12 @@
-"use client";
-import React, { useState } from "react";
-import SearchBar from "@/components/SearchBar";
+import { SearchBar } from "@/components/SearchBar";
 
-const HomePage = () => {
-  const [query, setQuery] = useState("");
-
-  const handleSearch = (value) => {
-    setQuery(value);
-    // Implement your search logic here
-    console.log("Search query:", value);
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Handle image upload logic here
-      console.log("Uploaded image:", file);
-      // You can also use URL.createObjectURL(file) to display the image
-    }
-  };
-
+export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-secondary">
-      {/* <h1 className="text-3xl mb-6">Search and Upload</h1> */}
-      <div className="absolute top-4 text-[clamp(24px,6vw,4px)]">
-        Information Retrieval Project
+    <main className="flex min-h-screen flex-col items-center justify-start p-4 md:p-24">
+      <div className="w-full max-w-4xl space-y-8">
+        <h1 className="text-4xl font-bold text-center">Search Interface</h1>
+        <SearchBar className="w-full" />
       </div>
-      <SearchBar
-        placeholder="Search here..."
-        onSearch={handleSearch}
-        onImageUpload={handleImageUpload}
-      />
-      {/* <p className="mt-4">Current search query: {query}</p> */}
-    </div>
+    </main>
   );
-};
-
-export default HomePage;
+}
