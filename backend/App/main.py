@@ -10,12 +10,28 @@ import numpy
 import cv2
 from sentence_transformers import SentenceTransformer
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 from Text_Functions import get_embedding
 from Image_Functions import *
 
 app = FastAPI()
 
+origins = [
+    "http://localhost",           # for local development
+    "http://localhost:3000",      # for frontend running on port 3000
+    "https://yourdomain.com",     # production domain
+    # add other origins if needed
+]
+
+# Adding CORS middleware to FastAPI app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            # Allows specified origins
+    allow_credentials=True,           # Allows cookies
+    allow_methods=["*"],              # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],              # Allows all headers
+)
 class QueryRequest(BaseModel):
     text_input: str
     image_input:str
@@ -92,10 +108,10 @@ async def Text_Query(request:QueryRequest):
     if response['hits']['total']['value'] > 0:
         for doc in response['hits']['hits']:
             doc_details={
-                        "Document ID":doc['_id'],"Score":doc['_score'],
-                         "Title":doc['_source']['Title'],
-                         "URL":doc['_source']['URL'],
-                         "Abstract":doc['_source']['Abstract']
+                        "doc_id":doc['_id'],"score":doc['_score'],
+                         "title":doc['_source']['Title'],
+                         "url":doc['_source']['URL'],
+                         "abstract":doc['_source']['Abstract']
             }
             res.append(doc_details)
 

@@ -184,9 +184,14 @@ index_name = "ir_project"
 
 create_index()
 
-main_folder = r"D:\programming\IR_Project\Documents(U)"
+main_folder = r"/Users/nikhilkarthik/Desktop/IIIT Dharwad/7th Sem/IR/Files"
+if not os.path.exists(main_folder):
+    print("Path does not exist. Please check the path.")
+else:
+    print("Path exists. Entering for loop now...\n")
 print("\n")
 for subdir, _, files in os.walk(main_folder):
+    # print("entered")
     if subdir==main_folder:
         continue
     average_embedding = []
