@@ -53,7 +53,9 @@ You should see a JSON response indicating that Elasticsearch is running.
 ### Step 5:
 
 Storing files on elasticsearch
-...
+Store the files in the following format:
+![image](https://github.com/user-attachments/assets/cf14f788-b6ec-4429-b743-80270171f08b)
+Once elastic search is setup and running, run elastic_final_store.py with the correct path to the folders in the script to store the documents.
 
 ---
 
