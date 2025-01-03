@@ -1,4 +1,3 @@
-
 ## 📍 Overview
 
 MIRAX is a multimodal information retrieval system designed to provide comprehensive responses to queries by integrating data from various sources, such as text and images. Unlike traditional systems that focus on a single modality, MIRAX leverages advanced techniques in NLP and computer vision to handle both text and image-based retrieval seamlessly. This platform enables efficient and accurate retrieval of information across multiple modalities, offering users a unified search experience.
@@ -19,10 +18,12 @@ Ensure you have the following dependencies installed on your system:
 To set up Elasticsearch for the project, follow these steps:
 
 ### Step 1: Download and Install Elasticsearch
-1. Visit the official [Elasticsearch download page](https://www.elastic.co/downloads/elasticsearch).  
+
+1. Visit the official [Elasticsearch download page](https://www.elastic.co/downloads/elasticsearch).
 2. Choose the version compatible with your system and download it.
 
-Alternatively, use the command below to download Elasticsearch via the terminal:  
+Alternatively, use the command below to download Elasticsearch via the terminal:
+
 ```bash
 curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.10.1-linux-x86_64.tar.gz
 ```
@@ -45,6 +46,7 @@ Run the Elasticsearch service:
 ```
 
 ### Step 4: Verify Installation
+
 Once the service starts, verify it's running by visiting:
 http://localhost:9200
 
@@ -54,7 +56,11 @@ You should see a JSON response indicating that Elasticsearch is running.
 
 Storing files on elasticsearch
 Store the files in the following format:
-![image](https://github.com/user-attachments/assets/cf14f788-b6ec-4429-b743-80270171f08b)
+
+<p>
+<img src="./file-structure.png" alt="folder structure">
+</p>
+<!-- ![image](https://github.com/user-attachments/assets/cf14f788-b6ec-4429-b743-80270171f08b) -->
 Once elastic search is setup and running, run elastic_final_store.py with the correct path to the folders in the script to store the documents.
 
 ---
@@ -81,6 +87,7 @@ pip install -r requirements.txt
 ```
 
 4. Install the dependencies for frontend:
+
 ```sh
 cd client
 npm install
@@ -106,25 +113,28 @@ The application will be accessible at http://localhost:3000.
 
 ---
 
-## Challenges  
-1. **Integration of Multimodal Data**:  
-   - Combining and processing information from both text and image sources effectively.  
-2. **Efficient Query Handling**:  
-   - Addressing multimodal queries (text and image) while maintaining speed and accuracy.  
-3. **Model Training and Optimization**:  
-   - Developing or fine-tuning a unified model for multimodal retrieval without overloading computational resources.  
-4. **Semantic Understanding**:  
+## Challenges
+
+1. **Integration of Multimodal Data**:
+   - Combining and processing information from both text and image sources effectively.
+2. **Efficient Query Handling**:
+   - Addressing multimodal queries (text and image) while maintaining speed and accuracy.
+3. **Model Training and Optimization**:
+   - Developing or fine-tuning a unified model for multimodal retrieval without overloading computational resources.
+4. **Semantic Understanding**:
    - Ensuring the system understands and retrieves contextually relevant data from diverse modalities.
 
 ---
 
-## Tech Stack Used  
-- **Languages/Frameworks**: Python, FastAPI  
-- **Libraries**:  
-  - **For Text Retrieval**: Elasticsearch, NLP Models (e.g., BERT)  
-  - **For Image Retrieval**: OpenCV, TensorFlow, PyTorch  
-- **Concepts**: Multi-task learning to handle text and image modalities  
+## Tech Stack Used
+
+- **Languages/Frameworks**: Python, FastAPI
+- **Libraries**:
+  - **For Text Retrieval**: Elasticsearch, NLP Models (e.g., BERT)
+  - **For Image Retrieval**: OpenCV, TensorFlow, PyTorch
+- **Concepts**: Multi-task learning to handle text and image modalities
 - **Tools**: Pre-trained models for object detection and semantic search to accelerate development and ensure accuracy.
+
 ---
 
 ## 👏 Contributors
