@@ -25,7 +25,7 @@ export function SearchBar({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const relativePath = `/Users/nikhilkarthik/Desktop/IIIT Dharwad/7th Sem/IR/Files/CBAM Convolutional Block Attention Module/${file.name}`; // Assuming images are in 'public/images/' directory
+      const relativePath = `/Users/nikhilkarthik/Documents/images/${file.name}`; // Assuming images are in 'public/images/' directory
 
       setImage(URL.createObjectURL(file)); // Set the file in the state
       setImagePreview(relativePath); // Generate a preview URL for the image
@@ -92,7 +92,8 @@ export function SearchBar({
 
       const result = await response.json();
       setData(result?.Result);
-
+      // setImage("");
+      // setImagePreview("");
       if (onSearchComplete) {
         onSearchComplete(result);
       }

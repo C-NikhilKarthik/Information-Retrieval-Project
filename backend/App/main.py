@@ -159,10 +159,10 @@ async def Image_Query(request:QueryRequest):
     if response['hits']['total']['value'] > 0:
         for doc in response['hits']['hits']:
             doc_details={
-                        "Document ID":doc['_id'],"Score":doc['_score'],
-                         "Title":doc['_source']['Title'],
-                         "URL":doc['_source']['URL'],
-                         "Abstract":doc['_source']['Abstract']
+                        "doc_id":doc['_id'],"score":doc['_score'],
+                         "title":doc['_source']['Title'],
+                         "url":doc['_source']['URL'],
+                         "abstract":doc['_source']['Abstract']
             }
             res.append(doc_details)
 
@@ -270,10 +270,10 @@ async def Combined_Query(request:QueryRequest):
     for i in range(10):
         doc_id = sorted_Documents[i][0]
         doc_details = {
-            "Document ID": doc_id, "Score": mapping[doc_id]["Score"],
-            "Title": mapping[doc_id]["Title"],
-            "URL": mapping[doc_id]["URL"],
-            "Abstract": mapping[doc_id]["Abstract"]
+            "doc_id": doc_id, "score": mapping[doc_id]["Score"],
+            "title": mapping[doc_id]["Title"],
+            "url": mapping[doc_id]["URL"],
+            "abstract": mapping[doc_id]["Abstract"]
         }
         res.append(doc_details)
 

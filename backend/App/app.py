@@ -161,25 +161,73 @@ def combined_query():
     response_text = es.search(index=index_name, body={"query": text_query})
     response_image = es.search(index=index_name, body=image_query)
 
-    results = {doc['_id']: doc['_score'] for doc in response_text['hits']['hits']}
-    for doc in response_image['hits']['hits']:
-        if doc['_id'] in results:
-            results[doc['_id']] += doc['_score']
-        else:
-            results[doc['_id']] = doc['_score']
+    sett = set()
+    mapping = {}
 
-    sorted_docs = sorted(results.items(), key=lambda x: x[1], reverse=True)[:10]
-    output = [
-        {
-            "doc_id": doc_id,
-            "score": score,
-            "title": response_text['hits']['hits'][0]['_source']['Title'],
-            "url": response_text['hits']['hits'][0]['_source']['URL'],
-            "abstract": response_text['hits']['hits'][0]['_source']['Abstract']
+    # Analyze results
+
+    for doc in response_text['hits']['hits']:
+        if doc['_id'] not in sett:
+            sett.add(doc['_id'])
+            mapping[doc['_id']] = {'Score': doc['_score'],
+                                   'Source': doc['_source'],
+                                    "Title": doc['_source']['Title'],
+                                    "URL": doc['_source']['URL'],
+                                    "Abstract": doc['_source']['Abstract']}
+        # print(f"Document ID: {doc['_id']}, Score: {doc['_score']}, Source: {doc['_source']}")
+
+    for doc in response_image['hits']['hits']:
+        if doc['_id'] not in sett:
+            sett.add(doc['_id'])
+            mapping[doc['_id']] = {'Score': doc['_score'],
+                                   'Source': doc['_source'],
+                                   "Title": doc['_source']['Title'],
+                                   "URL": doc['_source']['URL'],
+                                   "Abstract": doc['_source']['Abstract']}
+        else:
+            mapping[doc['_id']]['Score'] += doc['_score']
+
+        # print(f"Document ID: {doc['_id']}, Score: {doc['_score']}, Source: {doc['_source']}")
+
+    if len(mapping)==0:
+        return {"Result": "No Valid document found"}
+
+    Documents = []
+    for i in mapping:
+        Documents.append([i, mapping[i]['Score']])
+
+    sorted_Documents = sorted(Documents, key=lambda x: x[1], reverse=True)
+
+    res = []
+    for i in range(10):
+        doc_id = sorted_Documents[i][0]
+        doc_details = {
+            "doc_id": doc_id, "score": mapping[doc_id]["Score"],
+            "title": mapping[doc_id]["Title"],
+            "url": mapping[doc_id]["URL"],
+            "abstract": mapping[doc_id]["Abstract"]
         }
-        for doc_id, score in sorted_docs
-    ]
-    return jsonify({"Result": output})
+        res.append(doc_details)
+
+    # results = {doc['_id']: doc['_score'] for doc in response_text['hits']['hits']}
+    # for doc in response_image['hits']['hits']:
+    #     if doc['_id'] in results:
+    #         results[doc['_id']] += doc['_score']
+    #     else:
+    #         results[doc['_id']] = doc['_score']
+
+    # sorted_docs = sorted(results.items(), key=lambda x: x[1], reverse=True)[:10]
+    # output = [
+    #     {
+    #         "doc_id": doc_id,
+    #         "score": score,
+    #         "title": response_text['hits']['hits'][0]['_source']['Title'],
+    #         "url": response_text['hits']['hits'][0]['_source']['URL'],
+    #         "abstract": response_text['hits']['hits'][0]['_source']['Abstract']
+    #     }
+    #     for doc_id, score in sorted_docs
+    # ]
+    return jsonify({"Result": res})
 
 
 if __name__ == "__main__":
